@@ -7,7 +7,7 @@ namespace WorkerOne
         public static void Main(string[] args)
         {
             var builder = Host.CreateApplicationBuilder(args);
-            builder.AddServiceDefaults();
+            builder.AddServiceDefaults(new String[] { typeof(MessageBroker).Name });
             builder.Services.AddHostedService<Worker>();
 
             builder.AddRabbitMQClient(connectionName: "queue");

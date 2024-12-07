@@ -27,15 +27,6 @@ namespace WorkerOne
                 exclusive: false,
                 autoDelete: false
             );
-
-            // The following was added to get an activity from the StartActivity method (and not just null)
-            var activityListener = new ActivityListener
-            {
-                ShouldListenTo = s => true,
-                SampleUsingParentId = (ref ActivityCreationOptions<string> activityOptions) => ActivitySamplingResult.AllData,
-                Sample = (ref ActivityCreationOptions<ActivityContext> activityOptions) => ActivitySamplingResult.AllData
-            };
-            ActivitySource.AddActivityListener(activityListener);
         }
 
         public void PublishMessage(String message)
