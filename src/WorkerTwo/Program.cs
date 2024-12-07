@@ -5,7 +5,7 @@ namespace WorkerTwo
         public static void Main(string[] args)
         {
             var builder = Host.CreateApplicationBuilder(args);
-            builder.AddServiceDefaults(new String[] { typeof(Worker).Name });
+            builder.AddServiceDefaults(additionalSources: new String[] { typeof(Worker).Name });
             builder.Services.AddHostedService<Worker>();
 
             builder.AddRabbitMQClient(connectionName: "queue");

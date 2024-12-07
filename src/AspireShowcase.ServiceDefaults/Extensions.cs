@@ -15,9 +15,9 @@ namespace Microsoft.Extensions.Hosting;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
-    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder, String[] additionalSources) where TBuilder : IHostApplicationBuilder
+    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder, String[]? additionalSources = null, String[]? additionalMeters = null) where TBuilder : IHostApplicationBuilder
     {
-        builder.ConfigureOpenTelemetry(additionalSources);
+        builder.ConfigureOpenTelemetry(additionalSources, additionalMeters);
 
         builder.AddDefaultHealthChecks();
 
@@ -41,7 +41,7 @@ public static class Extensions
         return builder;
     }
 
-    public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder, String[] additionalSources) where TBuilder : IHostApplicationBuilder
+    public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder, String[]? additionalSources = null, String[]? additionalMeters = null) where TBuilder : IHostApplicationBuilder
     {
         builder.Logging.AddOpenTelemetry(logging =>
         {
@@ -52,22 +52,36 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
-                metrics.AddAspNetCoreInstrumentation()
+                IEnumerable<String> meters = new List<String> { };
+                if (additionalMeters != null)
+                {
+                    meters = meters.Union(additionalMeters);
+                }
+
+                metrics.AddMeter(meters.ToArray())
+                    .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
+                if (builder.Environment.IsDevelopment())
+                {
+                    // We want to view all traces in development
+                    tracing.SetSampler(new AlwaysOnSampler());
+                }
+
+                IEnumerable<String> sources = new List<String> { builder.Environment.ApplicationName };
+                if (additionalSources != null)
+                {
+                    sources = sources.Union(additionalSources);
+                }
+
+                tracing.AddSource(sources.ToArray())
                     .AddAspNetCoreInstrumentation()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
-
-                foreach (var source in additionalSources)
-                {
-                    tracing.AddSource(source);
-                }
             });
 
         builder.AddOpenTelemetryExporters();

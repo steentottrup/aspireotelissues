@@ -27,6 +27,14 @@ namespace WorkerOne
                 exclusive: false,
                 autoDelete: false
             );
+
+            //var activityListener = new ActivityListener
+            //{
+            //    ShouldListenTo = s => true,
+            //    SampleUsingParentId = (ref ActivityCreationOptions<string> activityOptions) => ActivitySamplingResult.AllData,
+            //    Sample = (ref ActivityCreationOptions<ActivityContext> activityOptions) => ActivitySamplingResult.AllData
+            //};
+            //ActivitySource.AddActivityListener(activityListener);
         }
 
         public void PublishMessage(String message)
